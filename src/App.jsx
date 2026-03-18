@@ -145,12 +145,7 @@ function App() {
           <div className="brand-mark">D</div>
           <div>
             <p className="brand-name">True Persepective</p>
-            <p className="brand-tag">Dotted daily briefing</p>
           </div>
-        </div>
-        <div className="topbar-pills">
-          <span className="mini-pill">{sourceModeLabel(sourceMode)}</span>
-          <span className="mini-pill">{preferences.selectedTopics.length} active topics</span>
         </div>
       </div>
 
@@ -449,7 +444,7 @@ function ArticleDetail({ article, onBack }) {
       <article className="article-detail">
         <div className="article-detail-header">
           <span className="story-type">{article.type}</span>
-          <p className="eyebrow">Demo article page</p>
+          <p className="eyebrow">Article page</p>
           <h1>{article.title}</h1>
           <div className="meta article-meta">
             <span>{article.source}</span>
@@ -495,7 +490,7 @@ function VideoDetail({ video, onBack }) {
       <article className="article-detail video-detail">
         <div className="article-detail-header">
           <span className="story-type">{video.type}</span>
-          <p className="eyebrow">Demo video page</p>
+          <p className="eyebrow">Video page</p>
           <h1>{video.title}</h1>
           <div className="meta article-meta">
             <span>{video.source}</span>
@@ -532,7 +527,7 @@ function VideoDetail({ video, onBack }) {
         <section className="article-section article-body">
           <p>{video.transcriptIntro || video.summary}</p>
           <p>
-            This internal demo page now opens one exact playable video instead of sending you to a general YouTube search result. That makes the
+            This internal page now opens one exact playable video instead of sending you to a general YouTube search result. That makes the
             selected recommendation match the card you clicked.
           </p>
         </section>

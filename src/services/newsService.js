@@ -176,7 +176,7 @@ export function getSourceMode() {
 export function sourceModeLabel(mode) {
   if (mode === "github") return "GitHub dataset connected";
   if (mode === "live-api") return "Live APIs connected";
-  return "Demo fallback data";
+  return "Fallback data";
 }
 
 export function prettyTopicList(items) {

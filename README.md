@@ -10,7 +10,7 @@ Two-tab personalized news website with article recommendations, video recommenda
 - Topic, political lens, and pace preferences
 - Live API support for GNews and YouTube Data API
 - GitHub JSON dataset support for combining a premade repo into the site
-- Automatic fallback demo data when no API key is set
+- Automatic fallback data when no API key is set
 
 ## Setup
 
