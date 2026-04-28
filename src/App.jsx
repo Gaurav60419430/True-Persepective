@@ -3,21 +3,8 @@ import { topics } from "./data/fallbackData";
 import { getArticleFeed, getSourceMode, getVideoFeed, sourceModeLabel } from "./services/newsService";
 import { sortByPreference } from "./utils/newsUtils";
 
-const REFRESH_INTERVAL_MS = 120000;
-const lensOptions = ["left", "balanced", "right"];
-const topicPreviewMap = {
-  Politics: "Policy Briefing",
-  Technology: "Tech Policy",
-  Business: "Market Signal",
-  Climate: "Climate Watch",
-  World: "World Brief",
-  Sports: "Sports Desk",
-  Health: "Health Note",
-  Culture: "Culture Scan"
-};
-
 const initialPreferences = {
-  selectedTopics: ["Technology"],
+  selectedTopics: ["Technology", "World", "Politics"],
   preferredBias: "balanced",
   preferredPace: "mixed"
 };
@@ -27,22 +14,18 @@ function App() {
   const [activeTab, setActiveTab] = useState("news");
   const [selectedArticle, setSelectedArticle] = useState(null);
   const [selectedVideo, setSelectedVideo] = useState(null);
+  const [trendingIndex, setTrendingIndex] = useState(0);
   const [articles, setArticles] = useState([]);
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [lastUpdated, setLastUpdated] = useState(null);
   const sourceMode = getSourceMode();
-  const selectedTopic = preferences.selectedTopics[0];
 
   useEffect(() => {
     let alive = true;
 
-    async function loadFeeds(showLoadingState) {
-      if (showLoadingState) {
-        setLoading(true);
-      }
-
+    async function loadFeeds() {
+      setLoading(true);
       setError("");
 
       try {
@@ -55,26 +38,19 @@ function App() {
 
         setArticles(articleItems);
         setVideos(videoItems);
-        setLastUpdated(Date.now());
       } catch (err) {
         if (!alive) return;
         setError(err.message || "Unable to load feeds right now.");
       } finally {
-        if (alive && showLoadingState) {
+        if (alive) {
           setLoading(false);
         }
       }
     }
 
-    loadFeeds(true);
-
-    const refreshId = window.setInterval(() => {
-      loadFeeds(false);
-    }, REFRESH_INTERVAL_MS);
-
+    loadFeeds();
     return () => {
       alive = false;
-      window.clearInterval(refreshId);
     };
   }, [preferences]);
 
@@ -82,14 +58,34 @@ function App() {
   const rankedVideos = useMemo(() => sortByPreference(videos, preferences), [videos, preferences]);
   const featuredArticle = rankedArticles[0];
   const featuredVideo = rankedVideos[0];
-  const secondaryArticle = rankedArticles[1];
-  const selectedLensIndex = lensOptions.indexOf(preferences.preferredBias);
+  const trendingSlides = useMemo(() => chunkItems(rankedArticles.slice(0, 9), 3), [rankedArticles]);
+  const activeTrendingSlide = trendingSlides[trendingIndex] || [];
+
+  useEffect(() => {
+    setTrendingIndex(0);
+  }, [trendingSlides.length]);
+
+  useEffect(() => {
+    if (trendingSlides.length <= 1) return undefined;
+
+    const intervalId = window.setInterval(() => {
+      setTrendingIndex((current) => (current + 1) % trendingSlides.length);
+    }, 5000);
+
+    return () => window.clearInterval(intervalId);
+  }, [trendingSlides]);
 
   function toggleTopic(topic) {
-    setPreferences((current) => ({
-      ...current,
-      selectedTopics: [topic]
-    }));
+    setPreferences((current) => {
+      const selected = current.selectedTopics.includes(topic)
+        ? current.selectedTopics.filter((item) => item !== topic)
+        : [...current.selectedTopics, topic];
+
+      return {
+        ...current,
+        selectedTopics: selected.length ? selected : [topic]
+      };
+    });
   }
 
   function resetPreferences() {
@@ -124,6 +120,16 @@ function App() {
     setSelectedVideo(null);
   }
 
+  function showPreviousTrending() {
+    if (!trendingSlides.length) return;
+    setTrendingIndex((current) => (current - 1 + trendingSlides.length) % trendingSlides.length);
+  }
+
+  function showNextTrending() {
+    if (!trendingSlides.length) return;
+    setTrendingIndex((current) => (current + 1) % trendingSlides.length);
+  }
+
   if (selectedArticle) {
     return <ArticleDetail article={selectedArticle} onBack={closeArticle} />;
   }
@@ -134,179 +140,229 @@ function App() {
 
   return (
     <div className="page-shell">
-      <header className="editorial-header">
-        <div className="editorial-brand">
-          <div className="brand-mark">T</div>
+      <div className="topbar">
+        <div className="brand-lockup">
+          <div className="brand-mark">D</div>
           <div>
-            <p className="brand-name">Editorial Focus</p>
-            <p className="brand-subtitle">Intellectual workspace</p>
+            <p className="brand-name">True Persepective</p>
           </div>
         </div>
-        <button className="icon-btn" type="button" onClick={resetPreferences} aria-label="Reset taste profile">
-          &#9881;
-        </button>
-      </header>
+      </div>
 
-      <main className="editorial-shell">
-        <section className="editorial-section intro-section">
-          <p className="eyebrow">Tailor Your Feed</p>
-          <h1 className="editorial-title">Tailor Your Feed</h1>
-          <p className="editorial-copy">Configure your intellectual workspace to match your reading preferences.</p>
-        </section>
+      <header className="hero">
+        <div className="hero-copy">
+          <p className="eyebrow">CURATED SIGNALS</p>
+          <h1>Your personalized news project for articles, videos, and political leaning insights.</h1>
+          <p className="hero-text">
+            This platform recommends article news and video news based on user interests, then labels each story as left-leaning, right-leaning, or balanced for quick comparison.
+          </p>
+          <div className="hero-metrics">
+            <div className="metric-tile">
+              <strong>{rankedArticles.length || 0}</strong>
+              <span>article picks</span>
+            </div>
+            <div className="metric-tile">
+              <strong>{rankedVideos.length || 0}</strong>
+              <span>video picks</span>
+            </div>
+            <div className="metric-tile">
+              <strong>{preferences.preferredBias}</strong>
+              <span>current lens</span>
+            </div>
+          </div>
+        </div>
 
-        <section className="editorial-section control-section">
-          <div className="section-line">
-            <span className="control-heading">Political Lens</span>
-            <span className="control-aside">Bias Calibration</span>
+        <div className="hero-panel">
+          <div className="hero-panel-head">
+            <div>
+              <p className="panel-label">Trending now</p>
+              <h2>Live perspective board</h2>
+            </div>
+            <span className="mini-pill">{sourceModeLabel(sourceMode)}</span>
           </div>
 
-          <div className="bias-card">
-            <div className="bias-rail">
-              <span className="bias-track" />
-              <span className={`bias-thumb lens-${preferences.preferredBias}`} style={{ left: `${selectedLensIndex * 50}%` }} />
-            </div>
-            <div className="bias-scale-labels">
-              {lensOptions.map((lens) => (
+          <div className="trending-carousel">
+            <button className="trending-arrow" type="button" aria-label="Previous trending stories" onClick={showPreviousTrending}>
+              &#8249;
+            </button>
+
+            <div key={`slide-${trendingIndex}`} className="trending-board trending-board-animated">
+              {activeTrendingSlide.map((item, index) => (
                 <button
-                  key={lens}
+                  key={`${item.id}-${index}`}
+                  className="trending-story"
                   type="button"
-                  className={`bias-label ${preferences.preferredBias === lens ? "active" : ""}`}
-                  onClick={() => setPreferences((current) => ({ ...current, preferredBias: lens }))}
+                  style={getTrendingCardStyle(item)}
+                  onClick={() => openArticle(item)}
                 >
-                  {lens === "balanced" ? "Center" : titleCaseLabel(lens)}
+                  <span className="trending-rank">0{trendingIndex * 3 + index + 1}</span>
+                  <div className="trending-copy">
+                    <span className="trending-source">{item.source}</span>
+                    <h3>{item.title}</h3>
+                    <p>{item.summary}</p>
+                  </div>
                 </button>
               ))}
             </div>
-          </div>
-        </section>
 
-        <section className="editorial-section control-section">
-          <div className="section-line">
-            <span className="control-heading">Core Topics</span>
-            <span className="info-badge">i</span>
+            <button className="trending-arrow" type="button" aria-label="Next trending stories" onClick={showNextTrending}>
+              &#8250;
+            </button>
           </div>
 
-          <div className="topic-pill-grid">
-            {topics.map((topic) => (
+          <div className="trending-indicators" aria-label="Trending slide indicators">
+            {trendingSlides.map((_, index) => (
               <button
-                key={topic}
+                key={`indicator-${index}`}
+                className={`trending-dot ${index === trendingIndex ? "active" : ""}`}
                 type="button"
-                className={`topic-pill ${selectedTopic === topic ? "active" : ""}`}
-                onClick={() => toggleTopic(topic)}
-              >
-                <span className="topic-pill-mark">{selectedTopic === topic ? "✓" : "+"}</span>
-                {topic === "Business" ? "Finance" : topic}
-              </button>
+                aria-label={`Show trending slide ${index + 1}`}
+                onClick={() => setTrendingIndex(index)}
+              />
             ))}
           </div>
-        </section>
+        </div>
+      </header>
 
-        <section className="editorial-section control-section">
-          <div className="section-line">
-            <span className="control-heading">News Intensity</span>
+      {!loading && featuredArticle && featuredVideo ? (
+        <section className="spotlight-grid">
+          <FeaturePanel
+            kicker="Editor's Pick"
+            title={featuredArticle.title}
+            text={featuredArticle.summary}
+            meta={`${featuredArticle.source} - ${featuredArticle.topic} - ${featuredArticle.publishedLabel || "Recent"}`}
+            leaning={featuredArticle.leaning}
+            ctaLabel={featuredArticle.isInternal ? "Read article" : "Open article"}
+            onClick={() => openArticle(featuredArticle)}
+          />
+          <FeaturePanel
+            kicker="Video Spotlight"
+            title={featuredVideo.title}
+            text={featuredVideo.summary}
+            meta={`${featuredVideo.source} - ${featuredVideo.topic} - ${featuredVideo.publishedLabel || "Recent"}`}
+            leaning={featuredVideo.leaning}
+            ctaLabel={featuredVideo.isInternal ? "Watch video" : "Open video"}
+            onClick={() => openVideo(featuredVideo)}
+          />
+        </section>
+      ) : null}
+
+      <main className="dashboard">
+        <section className="preferences card">
+          <div className="section-head">
+            <div>
+              <p className="section-kicker">Preference Engine</p>
+              <h2>Shape your recommendations</h2>
+            </div>
+            <button className="ghost-btn" type="button" onClick={resetPreferences}>
+              Reset taste profile
+            </button>
           </div>
 
-          <div className="intensity-switch" role="tablist" aria-label="News pace">
-            <button
-              type="button"
-              className={`intensity-option ${preferences.preferredPace !== "breaking" ? "active" : ""}`}
-              onClick={() => setPreferences((current) => ({ ...current, preferredPace: "analysis" }))}
-            >
-              <span className="intensity-icon">&#9783;</span>
-              <span className="intensity-copy">
-                <strong>Deep Dives</strong>
-                <small>Longer context</small>
-              </span>
-            </button>
-            <button
-              type="button"
-              className={`intensity-option ${preferences.preferredPace === "breaking" ? "active" : ""}`}
-              onClick={() => setPreferences((current) => ({ ...current, preferredPace: "breaking" }))}
-            >
-              <span className="intensity-icon">&#9889;</span>
-              <span className="intensity-copy">
-                <strong>Quick Hits</strong>
-                <small>Fast updates</small>
-              </span>
-            </button>
+          <div className="control-grid">
+            <div>
+              <label className="control-title">Topics</label>
+              <div className="chip-group">
+                {topics.map((topic) => (
+                  <button
+                    key={topic}
+                    type="button"
+                    className={`chip ${preferences.selectedTopics.includes(topic) ? "active" : ""}`}
+                    onClick={() => toggleTopic(topic)}
+                  >
+                    {topic}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="control-title" htmlFor="biasSelect">
+                Political lens
+              </label>
+              <select
+                id="biasSelect"
+                className="select-control"
+                value={preferences.preferredBias}
+                onChange={(event) => setPreferences((current) => ({ ...current, preferredBias: event.target.value }))}
+              >
+                <option value="balanced">Balanced</option>
+                <option value="left">Prefer left-leaning coverage</option>
+                <option value="right">Prefer right-leaning coverage</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="control-title" htmlFor="paceSelect">
+                News pace
+              </label>
+              <select
+                id="paceSelect"
+                className="select-control"
+                value={preferences.preferredPace}
+                onChange={(event) => setPreferences((current) => ({ ...current, preferredPace: event.target.value }))}
+              >
+                <option value="mixed">Mixed</option>
+                <option value="breaking">Mostly breaking stories</option>
+                <option value="analysis">Mostly deep analysis</option>
+              </select>
+            </div>
           </div>
         </section>
 
-        <section className="editorial-section preview-section">
-          <div className="section-line">
-            <span className="control-heading">Live Preview</span>
-            <span className="live-note">{loading ? "Updating live" : lastUpdated ? `Updated ${formatRefreshTime(lastUpdated)}` : sourceModeLabel(sourceMode)}</span>
-          </div>
-
-          {error ? <p className="status-message error">{error}</p> : null}
-          {loading ? <p className="status-message">Loading recommendations...</p> : null}
-
-          {!loading && featuredArticle ? (
-            <button className="preview-hero-card" type="button" onClick={() => openArticle(featuredArticle)}>
-              <div className="preview-hero-media" style={getPreviewCardStyle(featuredArticle)}>
-                <span className="preview-tag">{topicPreviewMap[selectedTopic] || selectedTopic}</span>
-              </div>
-              <div className="preview-hero-body">
-                <h2>{featuredArticle.title}</h2>
-                <p>{featuredArticle.summary}</p>
-                <div className="preview-meta-row">
-                  <span className="preview-source">{featuredArticle.source}</span>
-                  <span>{featuredArticle.readTime}</span>
-                </div>
-              </div>
-            </button>
-          ) : null}
-
-          {!loading && secondaryArticle ? (
-            <button className="preview-secondary-card" type="button" onClick={() => openArticle(secondaryArticle)}>
-              <div className="preview-secondary-head">
-                <span className="mini-outline">Analysis</span>
-                <span className="preview-day">Today</span>
-              </div>
-              <h3>{secondaryArticle.title}</h3>
-              <div className="preview-secondary-foot">
-                <span className="preview-insight">Policy Insight</span>
-              </div>
-            </button>
-          ) : null}
-        </section>
-
-        <section className="editorial-section feed-section">
-          <div className="feed-switch" role="tablist" aria-label="News modes">
+        <section className="content card">
+          <div className="tabs" role="tablist" aria-label="News modes">
             <button
-              className={`feed-switch-btn ${activeTab === "news" ? "active" : ""}`}
+              className={`tab ${activeTab === "news" ? "active" : ""}`}
               type="button"
               role="tab"
               aria-selected={activeTab === "news"}
               onClick={() => setActiveTab("news")}
             >
-              Feed
+              News Recommendation System
             </button>
             <button
-              className={`feed-switch-btn ${activeTab === "videos" ? "active" : ""}`}
+              className={`tab ${activeTab === "videos" ? "active" : ""}`}
               type="button"
               role="tab"
               aria-selected={activeTab === "videos"}
               onClick={() => setActiveTab("videos")}
             >
-              Explore
+              Video News Recommendation
             </button>
           </div>
+
+          {error ? <p className="status-message error">{error}</p> : null}
+          {loading ? <p className="status-message">Loading recommendations...</p> : null}
 
           {!loading && (
             <div className="tab-panels">
               <section className={`tab-panel ${activeTab === "news" ? "active" : ""}`} role="tabpanel">
-                <div className="feed-stack">
+                <div className="panel-header">
+                  <div>
+                    <p className="section-kicker">Articles</p>
+                    <h3>Recommended news for your profile</h3>
+                  </div>
+                  <p className="panel-note">Each card shows a quick political-leaning marker.</p>
+                </div>
+                <div className="card-grid">
                   {rankedArticles.map((item) => (
-                    <StoryCard key={item.id} item={item} mode="news" onArticleOpen={openArticle} compact />
+                    <StoryCard key={item.id} item={item} mode="news" onArticleOpen={openArticle} />
                   ))}
                 </div>
               </section>
 
               <section className={`tab-panel ${activeTab === "videos" ? "active" : ""}`} role="tabpanel">
-                <div className="feed-stack">
+                <div className="panel-header">
+                  <div>
+                    <p className="section-kicker">Videos</p>
+                    <h3>Video news suggestions matched to your taste</h3>
+                  </div>
+                  <p className="panel-note">Short explainers, live coverage, and deeper breakdowns.</p>
+                </div>
+                <div className="card-grid">
                   {rankedVideos.map((item) => (
-                    <StoryCard key={item.id} item={item} mode="videos" onArticleOpen={openArticle} onVideoOpen={openVideo} compact />
+                    <StoryCard key={item.id} item={item} mode="videos" onArticleOpen={openArticle} onVideoOpen={openVideo} />
                   ))}
                 </div>
               </section>
@@ -314,32 +370,13 @@ function App() {
           )}
         </section>
       </main>
-
-      <nav className="bottom-nav" aria-label="Primary navigation">
-        <button type="button" className="bottom-nav-item">
-          <span className="bottom-nav-icon">▦</span>
-          <span>Feed</span>
-        </button>
-        <button type="button" className="bottom-nav-item">
-          <span className="bottom-nav-icon">◌</span>
-          <span>Explore</span>
-        </button>
-        <button type="button" className="bottom-nav-item active">
-          <span className="bottom-nav-icon">▣</span>
-          <span>Balance</span>
-        </button>
-        <button type="button" className="bottom-nav-item">
-          <span className="bottom-nav-icon">◔</span>
-          <span>Profile</span>
-        </button>
-      </nav>
     </div>
   );
 }
 
-function StoryCard({ item, mode, onArticleOpen, onVideoOpen, compact = false }) {
+function StoryCard({ item, mode, onArticleOpen, onVideoOpen }) {
   return (
-    <article className={`story-card ${compact ? "compact" : ""}`}>
+    <article className="story-card">
       <div className="story-top">
         <span className="story-type">{item.type}</span>
         <span className={`leaning-badge ${item.leaning}`}>{formatLeaning(item.leaning)}</span>
@@ -373,6 +410,23 @@ function StoryCard({ item, mode, onArticleOpen, onVideoOpen, compact = false }) 
           </a>
         )}
       </div>
+    </article>
+  );
+}
+
+function FeaturePanel({ kicker, title, text, meta, leaning, ctaLabel, onClick }) {
+  return (
+    <article className="feature-panel">
+      <div className="feature-topline">
+        <span className="story-type">{kicker}</span>
+        <span className={`leaning-badge ${leaning}`}>{formatLeaning(leaning)}</span>
+      </div>
+      <h3>{title}</h3>
+      <p className="summary">{text}</p>
+      <p className="feature-meta">{meta}</p>
+      <button className="watch-btn" type="button" onClick={onClick}>
+        {ctaLabel}
+      </button>
     </article>
   );
 }
@@ -463,7 +517,7 @@ function VideoDetail({ video, onBack }) {
           <section className="article-section article-highlights">
             <h3>Video summary</h3>
             <p>
-              This recommendation uses an internal summary page so you can still review the story, key moments, and topic framing even when a direct
+              This recommendation uses an internal summary page so you can review the story, key moments, and topic framing even when a direct
               embedded video is not available.
             </p>
           </section>
@@ -482,10 +536,7 @@ function VideoDetail({ video, onBack }) {
 
         <section className="article-section article-body">
           <p>{video.transcriptIntro || video.summary}</p>
-          <p>
-            This internal page keeps the selected topic and political lane intact, so you can review the recommendation details even when the item is
-            a generated same-topic filler used to keep the lane complete.
-          </p>
+          <p>This internal page keeps the selected topic and political lane intact for the recommendation you clicked.</p>
         </section>
       </article>
     </div>
@@ -498,24 +549,22 @@ function formatLeaning(leaning) {
   return "Balanced";
 }
 
-function getPreviewCardStyle(item) {
+function chunkItems(items, size) {
+  const chunks = [];
+
+  for (let index = 0; index < items.length; index += size) {
+    chunks.push(items.slice(index, index + size));
+  }
+
+  return chunks;
+}
+
+function getTrendingCardStyle(item) {
   if (!item.image) return undefined;
 
   return {
-    backgroundImage: `linear-gradient(180deg, rgba(10, 10, 11, 0.15), rgba(10, 10, 11, 0.75)), url("${item.image}")`
+    backgroundImage: `linear-gradient(90deg, rgba(11, 12, 14, 0.88), rgba(11, 12, 14, 0.62)), url("${item.image}")`
   };
-}
-
-function titleCaseLabel(value) {
-  return value.charAt(0).toUpperCase() + value.slice(1);
-}
-
-function formatRefreshTime(value) {
-  return new Intl.DateTimeFormat("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    second: "2-digit"
-  }).format(new Date(value));
 }
 
 export default App;
