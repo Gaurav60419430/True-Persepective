@@ -1,0 +1,19 @@
+{
+  "name": "Editorial Focus",
+  "short_name": "Focus",
+  "description": "Installable personalized news workspace with article and video recommendations.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#121212",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

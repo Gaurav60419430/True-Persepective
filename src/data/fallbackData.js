@@ -177,6 +177,60 @@ export const fallbackArticleNews = [
       "Still, for governments watching supply chain risk grow more visible in everyday prices, protecting strategic corridors has become as much an economic policy issue as a defense one."
     ],
     publishedAt: "2026-03-17T14:45:00Z"
+  },
+  {
+    id: "a7",
+    slug: "premier-league-run-in-data-shifts-title-picture",
+    title: "Premier League run-in data shifts the title picture again",
+    source: "Sideline Review",
+    topic: "Sports",
+    leaning: "balanced",
+    pace: "breaking",
+    readTime: "4 min read",
+    summary: "New match-by-match projections reshape the title race as injuries, goal difference, and schedule strength tighten the margin.",
+    image: "https://images.unsplash.com/photo-1547347298-4074fc3086f0?auto=format&fit=crop&w=1200&q=80",
+    link: "/stories/premier-league-run-in-data-shifts-title-picture",
+    isInternal: true,
+    type: "Sports Desk",
+    author: "Rohan Malik",
+    keyPoints: [
+      "Recent fixtures sharply changed the odds for the top three clubs.",
+      "Injury availability and defensive consistency now matter more than raw form.",
+      "Analysts say the last stretch favors teams with deeper rotation options."
+    ],
+    content: [
+      "Fresh projections across the title race show how quickly a single match week can alter expectations when the top of the table remains compressed. Analysts tracking points trends, opponent difficulty, and player absences say the final stretch now hinges on squad depth as much as star power.",
+      "Managers are balancing risk more carefully, rotating lineups while trying to preserve momentum. That is increasing attention on bench production, set-piece efficiency, and whether clubs can avoid dropped points against lower-table opponents.",
+      "For supporters, the appeal lies in how little separates the contenders. For clubs, every tactical adjustment and recovery timeline now carries title-level significance."
+    ],
+    publishedAt: "2026-03-18T09:10:00Z"
+  },
+  {
+    id: "a8",
+    slug: "film-festivals-back-mid-budget-dramas-after-box-office-reset",
+    title: "Film festivals back mid-budget dramas after the box office reset",
+    source: "Culture Ledger",
+    topic: "Culture",
+    leaning: "balanced",
+    pace: "analysis",
+    readTime: "5 min read",
+    summary: "Programmers and distributors are betting that carefully curated festival runs can rebuild demand for adult dramas and literary adaptations.",
+    image: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1200&q=80",
+    link: "/stories/film-festivals-back-mid-budget-dramas-after-box-office-reset",
+    isInternal: true,
+    type: "Culture Report",
+    author: "Naina Bose",
+    keyPoints: [
+      "Festival buyers are looking again at character-driven films with modest budgets.",
+      "Studios see awards buzz as a way to extend theatrical relevance.",
+      "Streaming platforms remain influential, but theatrical identity still matters for prestige releases."
+    ],
+    content: [
+      "Film festival lineups are showing renewed confidence in mid-budget dramas after several years in which franchise economics dominated release calendars. Programmers say audiences are responding to stronger curation and more deliberate release strategies rather than volume alone.",
+      "Distributors argue that prestige films can still travel when festival reception creates momentum early. The strongest contenders often pair recognizable talent with highly specific storytelling that stands apart from blockbuster formulas.",
+      "The shift is notable for cultural coverage because it signals how festivals continue to shape taste, talent pipelines, and the conversation around which films are considered essential each year."
+    ],
+    publishedAt: "2026-03-18T08:40:00Z"
   }
 ];
 
@@ -324,5 +378,29 @@ export const fallbackVideoNews = [
     ],
     transcriptIntro: "Caption extract: 'You have to go back a decade for when a title race was this tight between three teams.'",
     publishedAt: "2026-03-17T16:00:00Z"
+  },
+  {
+    id: "v7",
+    slug: "museum-directors-on-why-younger-audiences-want-immersive-art",
+    title: "Museum directors explain why younger audiences want immersive art",
+    source: "PBS Arts",
+    topic: "Culture",
+    leaning: "balanced",
+    pace: "analysis",
+    duration: "4 min",
+    summary: "PBS Arts looks at how museums are redesigning exhibitions with digital storytelling, sound, and interactive formats to attract younger visitors.",
+    link: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    videoId: "dQw4w9WgXcQ",
+    embedUrl: "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
+    isInternal: true,
+    type: "Arts Brief",
+    host: "PBS Arts",
+    keyMoments: [
+      "How museums are rethinking gallery design for digital-native audiences.",
+      "Why curators are mixing scholarship with interactive storytelling.",
+      "How attendance goals are changing the way exhibitions are promoted and built."
+    ],
+    transcriptIntro: "This selected arts segment explores why cultural institutions are investing in immersive exhibition design to make galleries more engaging for younger audiences.",
+    publishedAt: "2026-03-18T07:05:00Z"
   }
 ];
