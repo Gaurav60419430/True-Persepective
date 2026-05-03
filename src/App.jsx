@@ -60,6 +60,8 @@ function App() {
   const featuredVideo = rankedVideos[0];
   const trendingSlides = useMemo(() => chunkItems(rankedArticles.slice(0, 9), 3), [rankedArticles]);
   const activeTrendingSlide = trendingSlides[trendingIndex] || [];
+  const hasNews = rankedArticles.length > 0;
+  const hasVideos = rankedVideos.length > 0;
 
   useEffect(() => {
     setTrendingIndex(0);
@@ -140,11 +142,15 @@ function App() {
 
   return (
     <div className="page-shell">
+      <a className="skip-link" href="#main-content">
+        Skip to main content
+      </a>
       <div className="topbar">
         <div className="brand-lockup">
           <div className="brand-mark">D</div>
           <div>
-            <p className="brand-name">True Persepective</p>
+            <p className="brand-name">True Perspective</p>
+            <p className="brand-tag">Personalized signals across article and video news</p>
           </div>
         </div>
       </div>
@@ -181,46 +187,53 @@ function App() {
             <span className="mini-pill">{sourceModeLabel(sourceMode)}</span>
           </div>
 
-          <div className="trending-carousel">
-            <button className="trending-arrow" type="button" aria-label="Previous trending stories" onClick={showPreviousTrending}>
-              &#8249;
-            </button>
-
-            <div key={`slide-${trendingIndex}`} className="trending-board trending-board-animated">
-              {activeTrendingSlide.map((item, index) => (
-                <button
-                  key={`${item.id}-${index}`}
-                  className="trending-story"
-                  type="button"
-                  style={getTrendingCardStyle(item)}
-                  onClick={() => openArticle(item)}
-                >
-                  <span className="trending-rank">0{trendingIndex * 3 + index + 1}</span>
-                  <div className="trending-copy">
-                    <span className="trending-source">{item.source}</span>
-                    <h3>{item.title}</h3>
-                    <p>{item.summary}</p>
-                  </div>
+          {trendingSlides.length ? (
+            <>
+              <div className="trending-carousel">
+                <button className="trending-arrow" type="button" aria-label="Previous trending stories" onClick={showPreviousTrending}>
+                  &#8249;
                 </button>
-              ))}
-            </div>
 
-            <button className="trending-arrow" type="button" aria-label="Next trending stories" onClick={showNextTrending}>
-              &#8250;
-            </button>
-          </div>
+                <div key={`slide-${trendingIndex}`} className="trending-board trending-board-animated">
+                  {activeTrendingSlide.map((item, index) => (
+                    <button
+                      key={`${item.id}-${index}`}
+                      className="trending-story"
+                      type="button"
+                      style={getTrendingCardStyle(item)}
+                      onClick={() => openArticle(item)}
+                      aria-label={`Open trending story: ${item.title}`}
+                    >
+                      <span className="trending-rank">0{trendingIndex * 3 + index + 1}</span>
+                      <div className="trending-copy">
+                        <span className="trending-source">{item.source}</span>
+                        <h3>{item.title}</h3>
+                        <p>{item.summary}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
 
-          <div className="trending-indicators" aria-label="Trending slide indicators">
-            {trendingSlides.map((_, index) => (
-              <button
-                key={`indicator-${index}`}
-                className={`trending-dot ${index === trendingIndex ? "active" : ""}`}
-                type="button"
-                aria-label={`Show trending slide ${index + 1}`}
-                onClick={() => setTrendingIndex(index)}
-              />
-            ))}
-          </div>
+                <button className="trending-arrow" type="button" aria-label="Next trending stories" onClick={showNextTrending}>
+                  &#8250;
+                </button>
+              </div>
+
+              <div className="trending-indicators" aria-label="Trending slide indicators">
+                {trendingSlides.map((_, index) => (
+                  <button
+                    key={`indicator-${index}`}
+                    className={`trending-dot ${index === trendingIndex ? "active" : ""}`}
+                    type="button"
+                    aria-label={`Show trending slide ${index + 1}`}
+                    onClick={() => setTrendingIndex(index)}
+                  />
+                ))}
+              </div>
+            </>
+          ) : (
+            <p className="status-message">Trending stories will appear here once recommendations load.</p>
+          )}
         </div>
       </header>
 
@@ -247,7 +260,7 @@ function App() {
         </section>
       ) : null}
 
-      <main className="dashboard">
+      <main className="dashboard" id="main-content">
         <section className="preferences card">
           <div className="section-head">
             <div>
@@ -316,6 +329,8 @@ function App() {
               className={`tab ${activeTab === "news" ? "active" : ""}`}
               type="button"
               role="tab"
+              id="tab-news"
+              aria-controls="panel-news"
               aria-selected={activeTab === "news"}
               onClick={() => setActiveTab("news")}
             >
@@ -325,6 +340,8 @@ function App() {
               className={`tab ${activeTab === "videos" ? "active" : ""}`}
               type="button"
               role="tab"
+              id="tab-videos"
+              aria-controls="panel-videos"
               aria-selected={activeTab === "videos"}
               onClick={() => setActiveTab("videos")}
             >
@@ -332,12 +349,18 @@ function App() {
             </button>
           </div>
 
-          {error ? <p className="status-message error">{error}</p> : null}
-          {loading ? <p className="status-message">Loading recommendations...</p> : null}
+          {error ? <p className="status-message error" aria-live="polite">{error}</p> : null}
+          {loading ? <p className="status-message" aria-live="polite">Loading recommendations...</p> : null}
 
           {!loading && (
             <div className="tab-panels">
-              <section className={`tab-panel ${activeTab === "news" ? "active" : ""}`} role="tabpanel">
+              <section
+                className={`tab-panel ${activeTab === "news" ? "active" : ""}`}
+                role="tabpanel"
+                id="panel-news"
+                aria-labelledby="tab-news"
+                hidden={activeTab !== "news"}
+              >
                 <div className="panel-header">
                   <div>
                     <p className="section-kicker">Articles</p>
@@ -346,13 +369,19 @@ function App() {
                   <p className="panel-note">Each card shows a quick political-leaning marker.</p>
                 </div>
                 <div className="card-grid">
-                  {rankedArticles.map((item) => (
+                  {hasNews ? rankedArticles.map((item) => (
                     <StoryCard key={item.id} item={item} mode="news" onArticleOpen={openArticle} />
-                  ))}
+                  )) : <p className="status-message">No article recommendations matched this filter yet.</p>}
                 </div>
               </section>
 
-              <section className={`tab-panel ${activeTab === "videos" ? "active" : ""}`} role="tabpanel">
+              <section
+                className={`tab-panel ${activeTab === "videos" ? "active" : ""}`}
+                role="tabpanel"
+                id="panel-videos"
+                aria-labelledby="tab-videos"
+                hidden={activeTab !== "videos"}
+              >
                 <div className="panel-header">
                   <div>
                     <p className="section-kicker">Videos</p>
@@ -361,9 +390,9 @@ function App() {
                   <p className="panel-note">Short explainers, live coverage, and deeper breakdowns.</p>
                 </div>
                 <div className="card-grid">
-                  {rankedVideos.map((item) => (
+                  {hasVideos ? rankedVideos.map((item) => (
                     <StoryCard key={item.id} item={item} mode="videos" onArticleOpen={openArticle} onVideoOpen={openVideo} />
-                  ))}
+                  )) : <p className="status-message">No video recommendations matched this filter yet.</p>}
                 </div>
               </section>
             </div>
