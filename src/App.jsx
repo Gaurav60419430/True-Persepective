@@ -480,6 +480,14 @@ function App() {
 function LoginPage({ onLogin, error }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const movingImages = useMemo(() => ([
+    "https://picsum.photos/seed/login-news-1/800/500",
+    "https://picsum.photos/seed/login-news-2/800/500",
+    "https://picsum.photos/seed/login-news-3/800/500",
+    "https://picsum.photos/seed/login-news-4/800/500",
+    "https://picsum.photos/seed/login-news-5/800/500",
+    "https://picsum.photos/seed/login-news-6/800/500"
+  ]), []);
 
   function handleSubmit(event) {
     event.preventDefault();
@@ -488,6 +496,18 @@ function LoginPage({ onLogin, error }) {
 
   return (
     <div className="login-shell">
+      <div className="login-bg-marquee" aria-hidden="true">
+        <div className="marquee-track marquee-track-rtl">
+          {[...movingImages, ...movingImages].map((image, index) => (
+            <img key={`rtl-${index}`} src={image} alt="" loading="lazy" />
+          ))}
+        </div>
+        <div className="marquee-track marquee-track-ltr">
+          {[...movingImages, ...movingImages].map((image, index) => (
+            <img key={`ltr-${index}`} src={image} alt="" loading="lazy" />
+          ))}
+        </div>
+      </div>
       <section className="login-card" aria-labelledby="login-title">
         <p className="eyebrow">WELCOME</p>
         <h1 id="login-title">Sign in to True Perspective</h1>
