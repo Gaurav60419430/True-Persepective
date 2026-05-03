@@ -90,6 +90,19 @@ function App() {
   const activeTrendingSlide = trendingSlides[trendingIndex] || [];
   const hasNews = rankedArticles.length > 0;
   const hasVideos = rankedVideos.length > 0;
+  const biasDistribution = useMemo(() => {
+    const totals = { left: 0, balanced: 0, right: 0 };
+    for (const item of rankedArticles) {
+      totals[item.leaning] = (totals[item.leaning] || 0) + 1;
+    }
+    const totalCount = rankedArticles.length || 1;
+
+    return {
+      left: Math.round((totals.left / totalCount) * 100),
+      balanced: Math.round((totals.balanced / totalCount) * 100),
+      right: Math.round((totals.right / totalCount) * 100)
+    };
+  }, [rankedArticles]);
 
   useEffect(() => {
     setTrendingIndex(0);
@@ -388,6 +401,8 @@ function App() {
         </section>
 
         <section className="content card">
+          <BiasBalanceMeter distribution={biasDistribution} />
+
           <div className="tabs" role="tablist" aria-label="News modes">
             <button
               className={`tab ${activeTab === "news" ? "active" : ""}`}
@@ -560,6 +575,8 @@ function LoginPage({ onLogin, error }) {
 
 function StoryCard({ item, mode, onArticleOpen, onVideoOpen }) {
   const hasImageBackground = mode === "news";
+  const [showBattle, setShowBattle] = useState(false);
+  const battleVariants = useMemo(() => buildHeadlineVariants(item), [item]);
 
   return (
     <article
@@ -585,21 +602,65 @@ function StoryCard({ item, mode, onArticleOpen, onVideoOpen }) {
 
       <div className="story-footer">
         <span className="score-badge">Match {item.score}%</span>
-        {mode === "news" && item.isInternal ? (
-          <button className="watch-btn" type="button" onClick={() => onArticleOpen(item)}>
-            Read story
-          </button>
-        ) : mode === "videos" && item.isInternal ? (
-          <button className="watch-btn" type="button" onClick={() => onVideoOpen(item)}>
-            Watch video
-          </button>
-        ) : (
-          <a className="watch-btn" href={item.link} target="_blank" rel="noreferrer">
-            {mode === "news" ? "Read story" : "Watch video"}
-          </a>
-        )}
+        <div className="story-actions">
+          {mode === "news" ? (
+            <button className="ghost-btn battle-btn" type="button" onClick={() => setShowBattle((value) => !value)}>
+              {showBattle ? "Hide headline battle" : "AI headline battle"}
+            </button>
+          ) : null}
+          {mode === "news" && item.isInternal ? (
+            <button className="watch-btn" type="button" onClick={() => onArticleOpen(item)}>
+              Read story
+            </button>
+          ) : mode === "videos" && item.isInternal ? (
+            <button className="watch-btn" type="button" onClick={() => onVideoOpen(item)}>
+              Watch video
+            </button>
+          ) : (
+            <a className="watch-btn" href={item.link} target="_blank" rel="noreferrer">
+              {mode === "news" ? "Read story" : "Watch video"}
+            </a>
+          )}
+        </div>
       </div>
+
+      {mode === "news" && showBattle ? (
+        <div className="headline-battle">
+          {battleVariants.map((variant) => (
+            <article key={`${item.id}-${variant.tone}`} className="headline-variant">
+              <img src={variant.image} alt="" loading="lazy" />
+              <span className={`leaning-badge ${variant.tone}`}>{variant.label}</span>
+              <h5>{variant.title}</h5>
+              <p>{variant.summary}</p>
+            </article>
+          ))}
+        </div>
+      ) : null}
     </article>
+  );
+}
+
+function BiasBalanceMeter({ distribution }) {
+  return (
+    <section className="bias-meter" aria-label="Bias balance meter">
+      <div className="panel-header">
+        <div>
+          <p className="section-kicker">Feed Health</p>
+          <h3>Bias Balance Meter</h3>
+        </div>
+        <p className="panel-note">Live mix from your current article feed.</p>
+      </div>
+      <div className="bias-bar" role="img" aria-label={`Left ${distribution.left} percent, balanced ${distribution.balanced} percent, right ${distribution.right} percent`}>
+        <span className="bias-segment left" style={{ width: `${distribution.left}%` }} />
+        <span className="bias-segment balanced" style={{ width: `${distribution.balanced}%` }} />
+        <span className="bias-segment right" style={{ width: `${distribution.right}%` }} />
+      </div>
+      <div className="bias-legend">
+        <span>Left {distribution.left}%</span>
+        <span>Balanced {distribution.balanced}%</span>
+        <span>Right {distribution.right}%</span>
+      </div>
+    </section>
   );
 }
 
@@ -765,6 +826,36 @@ function getStoryCardStyle(item) {
 function getUniqueArticleImage(item, context) {
   const seed = encodeURIComponent(`${context}-${item.id || item.link || item.title || item.source || "news"}`);
   return `https://picsum.photos/seed/${seed}/1200/800`;
+}
+
+function buildHeadlineVariants(item) {
+  const source = item.source || "News Desk";
+  const summary = item.summary || "Key developments continue around this story.";
+  const image = item.image || getUniqueArticleImage(item, "battle");
+
+  return [
+    {
+      tone: "balanced",
+      label: "Neutral framing",
+      title: `${item.title}`,
+      summary: `${source} reports the latest developments with a straight summary of claims and context.`,
+      image
+    },
+    {
+      tone: "left",
+      label: "Left framing",
+      title: `${item.title}: Public impact and accountability questions rise`,
+      summary: `${summary} Coverage emphasizes worker impact, public services, and institutional accountability.`,
+      image
+    },
+    {
+      tone: "right",
+      label: "Right framing",
+      title: `${item.title}: Stability, security, and market effects in focus`,
+      summary: `${summary} Coverage emphasizes long-term stability, security priorities, and economic freedom.`,
+      image
+    }
+  ];
 }
 
 function TrendingSkeletonCard() {

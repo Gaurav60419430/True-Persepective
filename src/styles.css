@@ -589,6 +589,50 @@ h3 {
   display: grid;
 }
 
+.bias-meter {
+  margin-bottom: 20px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.bias-bar {
+  display: flex;
+  width: 100%;
+  height: 14px;
+  overflow: hidden;
+  border-radius: 999px;
+  margin-top: 10px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.bias-segment {
+  height: 100%;
+  transition: width 0.55s ease;
+}
+
+.bias-segment.left {
+  background: var(--left);
+}
+
+.bias-segment.balanced {
+  background: var(--balanced);
+}
+
+.bias-segment.right {
+  background: var(--right);
+}
+
+.bias-legend {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
 .dashboard {
   display: grid;
   gap: 24px;
@@ -894,6 +938,55 @@ h3 {
   font-weight: 700;
 }
 
+.story-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.battle-btn {
+  padding: 10px 14px;
+}
+
+.headline-battle {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.headline-variant {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.34);
+  overflow: hidden;
+}
+
+.headline-variant img {
+  width: 100%;
+  height: 96px;
+  object-fit: cover;
+}
+
+.headline-variant .leaning-badge {
+  margin: 10px 10px 0;
+}
+
+.headline-variant h5 {
+  margin: 8px 10px 0;
+  font-family: "Source Serif 4", serif;
+  font-size: 1.02rem;
+  line-height: 1.2;
+}
+
+.headline-variant p {
+  margin: 8px 10px 10px;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
 .article-shell {
   padding-top: 32px;
 }
@@ -1125,6 +1218,11 @@ input:focus-visible {
     border-radius: 20px;
   }
 
+  .bias-legend {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
   .trending-carousel {
     grid-template-columns: 1fr;
   }
@@ -1166,5 +1264,9 @@ input:focus-visible {
   .tab {
     width: 100%;
     text-align: left;
+  }
+
+  .headline-battle {
+    grid-template-columns: 1fr;
   }
 }
