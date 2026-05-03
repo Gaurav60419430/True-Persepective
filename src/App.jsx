@@ -87,10 +87,6 @@ function App() {
   const featuredVideo = rankedVideos[0];
   const trendingSlides = useMemo(() => chunkItems(rankedArticles.slice(0, 9), 3), [rankedArticles]);
   const activeTrendingSlide = trendingSlides[trendingIndex] || [];
-  const sharedTrendingImage = useMemo(() => {
-    const itemWithImage = rankedArticles.find((item) => item.image);
-    return itemWithImage?.image || "https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1200&q=80";
-  }, [rankedArticles]);
   const hasNews = rankedArticles.length > 0;
   const hasVideos = rankedVideos.length > 0;
 
@@ -241,7 +237,7 @@ function App() {
                       key={`${item.id}-${index}`}
                       className="trending-story"
                       type="button"
-                      style={getTrendingCardStyle(item, sharedTrendingImage)}
+                      style={getTrendingCardStyle(item)}
                       onClick={() => openArticle(item)}
                       aria-label={`Open trending story: ${item.title}`}
                     >
@@ -679,11 +675,31 @@ function chunkItems(items, size) {
   return chunks;
 }
 
-function getTrendingCardStyle(item, sharedImage) {
-  const cardImage = item.image || sharedImage;
+const fallbackTrendingImages = [
+  "https://images.unsplash.com/photo-1495020689067-958852a7765e?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80"
+];
+
+function getTrendingCardStyle(item) {
+  const fallbackIndex = hashStringToIndex(String(item.id || item.title || item.source), fallbackTrendingImages.length);
+  const cardImage = item.image || fallbackTrendingImages[fallbackIndex];
   return {
     backgroundImage: `linear-gradient(90deg, rgba(11, 12, 14, 0.88), rgba(11, 12, 14, 0.62)), url("${cardImage}")`
   };
+}
+
+function hashStringToIndex(value, length) {
+  let hash = 0;
+
+  for (let index = 0; index < value.length; index += 1) {
+    hash = (hash * 31 + value.charCodeAt(index)) % 2147483647;
+  }
+
+  return Math.abs(hash) % length;
 }
 
 export default App;
