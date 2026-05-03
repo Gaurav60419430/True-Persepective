@@ -8,8 +8,11 @@ const initialPreferences = {
   preferredBias: "balanced",
   preferredPace: "mixed"
 };
+const SESSION_KEY = "tp_session_user";
 
 function App() {
+  const [user, setUser] = useState(() => window.localStorage.getItem(SESSION_KEY) || "");
+  const [authError, setAuthError] = useState("");
   const [preferences, setPreferences] = useState(initialPreferences);
   const [activeTab, setActiveTab] = useState("news");
   const [selectedArticle, setSelectedArticle] = useState(null);
@@ -20,6 +23,30 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const sourceMode = getSourceMode();
+
+  function login(credentials) {
+    const email = credentials.email.trim().toLowerCase();
+    const password = credentials.password.trim();
+
+    if (!email || !password) {
+      setAuthError("Email and password are required.");
+      return;
+    }
+
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      setAuthError("Please enter a valid email address.");
+      return;
+    }
+
+    setAuthError("");
+    setUser(email);
+    window.localStorage.setItem(SESSION_KEY, email);
+  }
+
+  function logout() {
+    setUser("");
+    window.localStorage.removeItem(SESSION_KEY);
+  }
 
   useEffect(() => {
     let alive = true;
@@ -140,6 +167,10 @@ function App() {
     return <VideoDetail video={selectedVideo} onBack={closeVideo} />;
   }
 
+  if (!user) {
+    return <LoginPage onLogin={login} error={authError} />;
+  }
+
   return (
     <div className="page-shell">
       <a className="skip-link" href="#main-content">
@@ -152,6 +183,12 @@ function App() {
             <p className="brand-name">True Perspective</p>
             <p className="brand-tag">Personalized signals across article and video news</p>
           </div>
+        </div>
+        <div className="topbar-account">
+          <span className="mini-pill">{user}</span>
+          <button className="ghost-btn" type="button" onClick={logout}>
+            Log out
+          </button>
         </div>
       </div>
 
@@ -399,6 +436,56 @@ function App() {
           )}
         </section>
       </main>
+    </div>
+  );
+}
+
+function LoginPage({ onLogin, error }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  function handleSubmit(event) {
+    event.preventDefault();
+    onLogin({ email, password });
+  }
+
+  return (
+    <div className="login-shell">
+      <section className="login-card" aria-labelledby="login-title">
+        <p className="eyebrow">WELCOME</p>
+        <h1 id="login-title">Sign in to True Perspective</h1>
+        <p className="hero-text">Access your personalized news and video recommendations with your account.</p>
+        <form className="login-form" onSubmit={handleSubmit}>
+          <label className="control-title" htmlFor="email">
+            Email
+          </label>
+          <input
+            id="email"
+            type="email"
+            className="input-control"
+            autoComplete="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            placeholder="you@example.com"
+          />
+          <label className="control-title" htmlFor="password">
+            Password
+          </label>
+          <input
+            id="password"
+            type="password"
+            className="input-control"
+            autoComplete="current-password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            placeholder="Enter password"
+          />
+          {error ? <p className="status-message error" aria-live="polite">{error}</p> : null}
+          <button className="watch-btn login-btn" type="submit">
+            Sign in
+          </button>
+        </form>
+      </section>
     </div>
   );
 }

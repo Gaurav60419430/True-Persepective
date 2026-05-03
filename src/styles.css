@@ -69,6 +69,49 @@ a {
   padding: 28px 0 48px;
 }
 
+.login-shell {
+  width: min(560px, calc(100% - 32px));
+  min-height: 100vh;
+  margin: 0 auto;
+  display: grid;
+  place-items: center;
+}
+
+.login-card {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xl);
+  background: rgba(22, 20, 22, 0.94);
+  backdrop-filter: blur(16px);
+  box-shadow: var(--shadow);
+  padding: 32px;
+}
+
+.login-card h1 {
+  max-width: 16ch;
+  font-size: clamp(2rem, 5vw, 3rem);
+}
+
+.login-form {
+  margin-top: 22px;
+  display: grid;
+  gap: 10px;
+}
+
+.input-control {
+  width: 100%;
+  padding: 13px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+}
+
+.login-btn {
+  margin-top: 8px;
+}
+
 .topbar,
 .section-head,
 .panel-header,
@@ -91,6 +134,7 @@ a {
 }
 
 .brand-lockup,
+.topbar-account,
 .topbar-pills,
 .hero-metrics,
 .feature-topline,
@@ -792,7 +836,8 @@ h3 {
 
 button:focus-visible,
 a:focus-visible,
-select:focus-visible {
+select:focus-visible,
+input:focus-visible {
   outline: 2px solid var(--brand);
   outline-offset: 3px;
 }
@@ -850,7 +895,12 @@ select:focus-visible {
     padding-top: 16px;
   }
 
+  .login-card {
+    padding: 22px;
+  }
+
   .topbar,
+  .topbar-account,
   .topbar-pills,
   .hero-metrics,
   .feature-topline,
