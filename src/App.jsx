@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Analytics } from "@vercel/analytics/react";
 import { topics } from "./data/fallbackData";
 import { getArticleFeed, getSourceMode, getVideoFeed, sourceModeLabel } from "./services/newsService";
 import { sortByPreference } from "./utils/newsUtils";
@@ -399,6 +400,7 @@ function App() {
           )}
         </section>
       </main>
+      <Analytics />
     </div>
   );
 }
