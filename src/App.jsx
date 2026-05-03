@@ -491,8 +491,13 @@ function LoginPage({ onLogin, error }) {
 }
 
 function StoryCard({ item, mode, onArticleOpen, onVideoOpen }) {
+  const hasImageBackground = mode === "news";
+
   return (
-    <article className="story-card">
+    <article
+      className={`story-card ${hasImageBackground ? "story-card-with-image" : ""}`}
+      style={hasImageBackground ? getStoryCardStyle(item) : undefined}
+    >
       <div className="story-top">
         <span className="story-type">{item.type}</span>
         <span className={`leaning-badge ${item.leaning}`}>{formatLeaning(item.leaning)}</span>
@@ -689,6 +694,14 @@ function getTrendingCardStyle(item) {
   const cardImage = item.image || fallbackTrendingImages[fallbackIndex];
   return {
     backgroundImage: `linear-gradient(90deg, rgba(11, 12, 14, 0.88), rgba(11, 12, 14, 0.62)), url("${cardImage}")`
+  };
+}
+
+function getStoryCardStyle(item) {
+  const fallbackIndex = hashStringToIndex(String(item.id || item.title || item.source), fallbackTrendingImages.length);
+  const cardImage = item.image || fallbackTrendingImages[fallbackIndex];
+  return {
+    backgroundImage: `linear-gradient(180deg, rgba(8, 9, 12, 0.32), rgba(8, 9, 12, 0.9) 72%), url("${cardImage}")`
   };
 }
 
