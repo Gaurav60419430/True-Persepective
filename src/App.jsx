@@ -105,8 +105,10 @@ function App() {
     }
 
     loadCnnBreaking();
+    const intervalId = window.setInterval(loadCnnBreaking, 60000);
     return () => {
       alive = false;
+      window.clearInterval(intervalId);
     };
   }, []);
 
