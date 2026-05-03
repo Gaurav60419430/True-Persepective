@@ -87,6 +87,10 @@ function App() {
   const featuredVideo = rankedVideos[0];
   const trendingSlides = useMemo(() => chunkItems(rankedArticles.slice(0, 9), 3), [rankedArticles]);
   const activeTrendingSlide = trendingSlides[trendingIndex] || [];
+  const sharedTrendingImage = useMemo(() => {
+    const itemWithImage = rankedArticles.find((item) => item.image);
+    return itemWithImage?.image || "https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1200&q=80";
+  }, [rankedArticles]);
   const hasNews = rankedArticles.length > 0;
   const hasVideos = rankedVideos.length > 0;
 
@@ -237,7 +241,7 @@ function App() {
                       key={`${item.id}-${index}`}
                       className="trending-story"
                       type="button"
-                      style={getTrendingCardStyle(item)}
+                      style={getTrendingCardStyle(item, sharedTrendingImage)}
                       onClick={() => openArticle(item)}
                       aria-label={`Open trending story: ${item.title}`}
                     >
@@ -675,11 +679,10 @@ function chunkItems(items, size) {
   return chunks;
 }
 
-function getTrendingCardStyle(item) {
-  if (!item.image) return undefined;
-
+function getTrendingCardStyle(item, sharedImage) {
+  const cardImage = item.image || sharedImage;
   return {
-    backgroundImage: `linear-gradient(90deg, rgba(11, 12, 14, 0.88), rgba(11, 12, 14, 0.62)), url("${item.image}")`
+    backgroundImage: `linear-gradient(90deg, rgba(11, 12, 14, 0.88), rgba(11, 12, 14, 0.62)), url("${cardImage}")`
   };
 }
 
