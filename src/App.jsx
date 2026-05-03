@@ -680,39 +680,23 @@ function chunkItems(items, size) {
   return chunks;
 }
 
-const fallbackTrendingImages = [
-  "https://images.unsplash.com/photo-1495020689067-958852a7765e?auto=format&fit=crop&w=1200&q=80",
-  "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=1200&q=80",
-  "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=1200&q=80",
-  "https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1200&q=80",
-  "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1200&q=80",
-  "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80"
-];
-
 function getTrendingCardStyle(item) {
-  const fallbackIndex = hashStringToIndex(String(item.id || item.title || item.source), fallbackTrendingImages.length);
-  const cardImage = item.image || fallbackTrendingImages[fallbackIndex];
+  const cardImage = getUniqueArticleImage(item, "trending");
   return {
     backgroundImage: `linear-gradient(90deg, rgba(11, 12, 14, 0.88), rgba(11, 12, 14, 0.62)), url("${cardImage}")`
   };
 }
 
 function getStoryCardStyle(item) {
-  const fallbackIndex = hashStringToIndex(String(item.id || item.title || item.source), fallbackTrendingImages.length);
-  const cardImage = item.image || fallbackTrendingImages[fallbackIndex];
+  const cardImage = getUniqueArticleImage(item, "feed");
   return {
     backgroundImage: `linear-gradient(180deg, rgba(8, 9, 12, 0.32), rgba(8, 9, 12, 0.9) 72%), url("${cardImage}")`
   };
 }
 
-function hashStringToIndex(value, length) {
-  let hash = 0;
-
-  for (let index = 0; index < value.length; index += 1) {
-    hash = (hash * 31 + value.charCodeAt(index)) % 2147483647;
-  }
-
-  return Math.abs(hash) % length;
+function getUniqueArticleImage(item, context) {
+  const seed = encodeURIComponent(`${context}-${item.id || item.link || item.title || item.source || "news"}`);
+  return `https://picsum.photos/seed/${seed}/1200/800`;
 }
 
 export default App;
