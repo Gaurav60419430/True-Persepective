@@ -1035,13 +1035,6 @@ input:focus-visible {
     border-radius: 20px;
   }
 
-  .mobile-sticky-controls {
-    position: sticky;
-    top: 8px;
-    z-index: 40;
-    backdrop-filter: blur(18px);
-  }
-
   .trending-carousel {
     grid-template-columns: 1fr;
   }

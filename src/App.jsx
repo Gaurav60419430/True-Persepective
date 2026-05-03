@@ -325,7 +325,7 @@ function App() {
       ) : null}
 
       <main className="dashboard" id="main-content">
-        <section className="preferences card mobile-sticky-controls">
+        <section className="preferences card">
           <div className="section-head">
             <div>
               <p className="section-kicker">Preference Engine</p>
