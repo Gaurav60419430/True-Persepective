@@ -283,8 +283,11 @@ a {
   flex-direction: column;
   justify-content: space-between;
   background:
-    linear-gradient(180deg, rgba(37, 31, 29, 0.95), rgba(26, 22, 24, 0.98)),
+    radial-gradient(circle at 82% 14%, rgba(122, 176, 255, 0.1), transparent 22%),
+    radial-gradient(circle at 10% 90%, rgba(255, 143, 87, 0.09), transparent 22%),
+    linear-gradient(180deg, rgba(34, 28, 26, 0.95), rgba(21, 18, 20, 0.98)),
     linear-gradient(135deg, rgba(240, 196, 142, 0.06), rgba(122, 176, 255, 0.06));
+  border-color: rgba(240, 196, 142, 0.2);
 }
 
 .hero-panel-head {
@@ -368,7 +371,7 @@ h3 {
 .trending-board {
   margin-top: 20px;
   display: grid;
-  gap: 14px;
+  gap: 12px;
 }
 
 .trending-carousel {
@@ -393,22 +396,33 @@ h3 {
   min-height: 132px;
   padding: 16px;
   border: 1px solid var(--line);
-  border-radius: 18px;
+  border-radius: 20px;
   background:
-    linear-gradient(90deg, rgba(11, 12, 14, 0.88), rgba(11, 12, 14, 0.62)),
-    linear-gradient(135deg, rgba(48, 38, 31, 0.86), rgba(22, 26, 34, 0.92));
+    linear-gradient(100deg, rgba(8, 9, 12, 0.89), rgba(8, 9, 12, 0.58)),
+    linear-gradient(135deg, rgba(52, 39, 31, 0.8), rgba(21, 25, 33, 0.9));
   background-size: cover;
   background-position: center;
   text-align: left;
   color: var(--text);
   cursor: pointer;
-  transition: transform 0.25s ease, border-color 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
+  transition: transform 0.25s ease, border-color 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .trending-story:hover {
   transform: translateY(-3px) scale(1.01);
-  border-color: rgba(240, 196, 142, 0.28);
-  box-shadow: 0 18px 34px rgba(0, 0, 0, 0.28);
+  border-color: rgba(240, 196, 142, 0.4);
+  box-shadow: 0 20px 36px rgba(0, 0, 0, 0.34);
+  filter: saturate(1.05);
+}
+
+.trending-story::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 40%;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.45));
+  pointer-events: none;
 }
 
 .trending-rank {
@@ -417,9 +431,11 @@ h3 {
   width: 44px;
   height: 44px;
   border-radius: 14px;
-  background: linear-gradient(135deg, rgba(240, 196, 142, 0.18), rgba(255, 143, 87, 0.12));
+  background: linear-gradient(135deg, rgba(240, 196, 142, 0.24), rgba(255, 143, 87, 0.18));
   color: var(--brand);
   font-weight: 700;
+  border: 1px solid rgba(240, 196, 142, 0.25);
+  backdrop-filter: blur(8px);
 }
 
 .trending-copy {
@@ -439,16 +455,24 @@ h3 {
 }
 
 .trending-copy h3 {
-  font-size: 1.3rem;
-  line-height: 1.05;
+  font-size: 1.35rem;
+  line-height: 1.08;
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.32);
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .trending-copy p {
   margin: 10px 0 0;
-  color: var(--muted);
-  line-height: 1.55;
-  font-size: 0.93rem;
+  color: rgba(241, 227, 214, 0.82);
+  line-height: 1.58;
+  font-size: 0.97rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .trending-indicators {
@@ -461,7 +485,7 @@ h3 {
   height: 44px;
   border: 1px solid var(--line);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.06);
   color: var(--text);
   font-size: 1.7rem;
   line-height: 1;
@@ -471,8 +495,8 @@ h3 {
 
 .trending-arrow:hover {
   transform: translateY(-1px);
-  border-color: rgba(240, 196, 142, 0.28);
-  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(240, 196, 142, 0.4);
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .trending-dot {
@@ -487,6 +511,7 @@ h3 {
 
 .trending-dot.active {
   background: linear-gradient(135deg, var(--brand), var(--brand-2));
+  transform: scaleX(1.08);
 }
 
 .spotlight-grid,
@@ -928,6 +953,27 @@ input:focus-visible {
 
   .trending-carousel {
     grid-template-columns: 1fr;
+  }
+
+  .trending-story {
+    min-height: 118px;
+    grid-template-columns: 40px 1fr;
+    padding: 14px;
+  }
+
+  .trending-rank {
+    width: 40px;
+    height: 40px;
+  }
+
+  .trending-copy h3 {
+    font-size: 1.2rem;
+    -webkit-line-clamp: 3;
+  }
+
+  .trending-copy p {
+    font-size: 0.92rem;
+    -webkit-line-clamp: 2;
   }
 
   .trending-arrow {
