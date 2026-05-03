@@ -70,13 +70,14 @@ a {
 }
 
 .login-shell {
-  width: min(560px, calc(100% - 32px));
+  width: 100%;
   min-height: 100vh;
   margin: 0 auto;
   display: grid;
   place-items: center;
   position: relative;
   overflow: hidden;
+  padding: 20px 16px;
 }
 
 .login-bg-marquee {
@@ -84,9 +85,10 @@ a {
   inset: 0;
   display: grid;
   align-content: center;
-  gap: 18px;
-  opacity: 0.58;
+  gap: 22px;
+  opacity: 0.72;
   pointer-events: none;
+  z-index: 0;
 }
 
 .login-bg-marquee::after {
@@ -104,25 +106,42 @@ a {
   width: max-content;
 }
 
+.marquee-row {
+  width: 100vw;
+  overflow: hidden;
+}
+
 .marquee-track img {
-  width: 220px;
-  height: 138px;
+  width: 280px;
+  height: 160px;
   object-fit: cover;
   border-radius: 14px;
-  border: 1px solid rgba(240, 196, 142, 0.22);
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(240, 196, 142, 0.24);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.4);
 }
 
 .marquee-track-rtl {
-  animation: marqueeRtl 32s linear infinite;
+  animation: marqueeRtl 34s linear infinite;
 }
 
 .marquee-track-ltr {
-  animation: marqueeLtr 32s linear infinite;
+  animation: marqueeLtr 34s linear infinite;
+}
+
+.marquee-speed-slow {
+  animation-duration: 42s;
+}
+
+.marquee-speed-medium {
+  animation-duration: 34s;
+}
+
+.marquee-speed-fast {
+  animation-duration: 28s;
 }
 
 .login-card {
-  width: 100%;
+  width: min(560px, calc(100% - 16px));
   border: 1px solid var(--line);
   border-radius: var(--radius-xl);
   background: rgba(22, 20, 22, 0.94);
@@ -1075,8 +1094,8 @@ input:focus-visible {
   }
 
   .marquee-track img {
-    width: 176px;
-    height: 112px;
+    width: 188px;
+    height: 110px;
   }
 
   .topbar,

@@ -497,15 +497,26 @@ function LoginPage({ onLogin, error }) {
   return (
     <div className="login-shell">
       <div className="login-bg-marquee" aria-hidden="true">
-        <div className="marquee-track marquee-track-rtl">
-          {[...movingImages, ...movingImages].map((image, index) => (
-            <img key={`rtl-${index}`} src={image} alt="" loading="lazy" />
-          ))}
+        <div className="marquee-row">
+          <div className="marquee-track marquee-track-rtl marquee-speed-slow">
+            {[...movingImages, ...movingImages].map((image, index) => (
+              <img key={`rtl-top-${index}`} src={image} alt="" loading="lazy" />
+            ))}
+          </div>
         </div>
-        <div className="marquee-track marquee-track-ltr">
-          {[...movingImages, ...movingImages].map((image, index) => (
-            <img key={`ltr-${index}`} src={image} alt="" loading="lazy" />
-          ))}
+        <div className="marquee-row">
+          <div className="marquee-track marquee-track-ltr marquee-speed-medium">
+            {[...movingImages, ...movingImages].map((image, index) => (
+              <img key={`ltr-middle-${index}`} src={image} alt="" loading="lazy" />
+            ))}
+          </div>
+        </div>
+        <div className="marquee-row">
+          <div className="marquee-track marquee-track-rtl marquee-speed-fast">
+            {[...movingImages, ...movingImages].map((image, index) => (
+              <img key={`rtl-bottom-${index}`} src={image} alt="" loading="lazy" />
+            ))}
+          </div>
         </div>
       </div>
       <section className="login-card" aria-labelledby="login-title">
