@@ -575,8 +575,6 @@ function LoginPage({ onLogin, error }) {
 
 function StoryCard({ item, mode, onArticleOpen, onVideoOpen }) {
   const hasImageBackground = mode === "news";
-  const [showBattle, setShowBattle] = useState(false);
-  const battleVariants = useMemo(() => buildHeadlineVariants(item), [item]);
 
   return (
     <article
@@ -602,40 +600,20 @@ function StoryCard({ item, mode, onArticleOpen, onVideoOpen }) {
 
       <div className="story-footer">
         <span className="score-badge">Match {item.score}%</span>
-        <div className="story-actions">
-          {mode === "news" ? (
-            <button className="ghost-btn battle-btn" type="button" onClick={() => setShowBattle((value) => !value)}>
-              {showBattle ? "Hide headline battle" : "AI headline battle"}
-            </button>
-          ) : null}
-          {mode === "news" && item.isInternal ? (
-            <button className="watch-btn" type="button" onClick={() => onArticleOpen(item)}>
-              Read story
-            </button>
-          ) : mode === "videos" && item.isInternal ? (
-            <button className="watch-btn" type="button" onClick={() => onVideoOpen(item)}>
-              Watch video
-            </button>
-          ) : (
-            <a className="watch-btn" href={item.link} target="_blank" rel="noreferrer">
-              {mode === "news" ? "Read story" : "Watch video"}
-            </a>
-          )}
-        </div>
+        {mode === "news" && item.isInternal ? (
+          <button className="watch-btn" type="button" onClick={() => onArticleOpen(item)}>
+            Read story
+          </button>
+        ) : mode === "videos" && item.isInternal ? (
+          <button className="watch-btn" type="button" onClick={() => onVideoOpen(item)}>
+            Watch video
+          </button>
+        ) : (
+          <a className="watch-btn" href={item.link} target="_blank" rel="noreferrer">
+            {mode === "news" ? "Read story" : "Watch video"}
+          </a>
+        )}
       </div>
-
-      {mode === "news" && showBattle ? (
-        <div className="headline-battle">
-          {battleVariants.map((variant) => (
-            <article key={`${item.id}-${variant.tone}`} className="headline-variant">
-              <img src={variant.image} alt="" loading="lazy" />
-              <span className={`leaning-badge ${variant.tone}`}>{variant.label}</span>
-              <h5>{variant.title}</h5>
-              <p>{variant.summary}</p>
-            </article>
-          ))}
-        </div>
-      ) : null}
     </article>
   );
 }
@@ -682,6 +660,9 @@ function FeaturePanel({ kicker, title, text, meta, leaning, ctaLabel, onClick })
 }
 
 function ArticleDetail({ article, onBack }) {
+  const [showBattle, setShowBattle] = useState(true);
+  const battleVariants = useMemo(() => buildHeadlineVariants(article), [article]);
+
   return (
     <div className="page-shell article-shell">
       <div className="article-topbar">
@@ -721,6 +702,30 @@ function ArticleDetail({ article, onBack }) {
           {article.content?.map((paragraph, index) => (
             <p key={`${article.id}-${index}`}>{paragraph}</p>
           ))}
+        </section>
+
+        <section className="article-section">
+          <div className="section-head">
+            <div>
+              <p className="section-kicker">AI Headline Battle</p>
+              <h3>Compare framing on this story</h3>
+            </div>
+            <button className="ghost-btn battle-btn" type="button" onClick={() => setShowBattle((value) => !value)}>
+              {showBattle ? "Hide battle" : "Show battle"}
+            </button>
+          </div>
+          {showBattle ? (
+            <div className="headline-battle">
+              {battleVariants.map((variant) => (
+                <article key={`${article.id}-${variant.tone}`} className="headline-variant">
+                  <img src={variant.image} alt="" loading="lazy" />
+                  <span className={`leaning-badge ${variant.tone}`}>{variant.label}</span>
+                  <h5>{variant.title}</h5>
+                  <p>{variant.summary}</p>
+                </article>
+              ))}
+            </div>
+          ) : null}
         </section>
       </article>
     </div>
