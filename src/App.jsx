@@ -20,6 +20,8 @@ function App() {
   const [trendingIndex, setTrendingIndex] = useState(0);
   const [articles, setArticles] = useState([]);
   const [videos, setVideos] = useState([]);
+  const [cnnBreaking, setCnnBreaking] = useState([]);
+  const [cnnLoading, setCnnLoading] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const touchStartX = useRef(null);
@@ -81,6 +83,32 @@ function App() {
       alive = false;
     };
   }, [preferences]);
+
+  useEffect(() => {
+    let alive = true;
+
+    async function loadCnnBreaking() {
+      setCnnLoading(true);
+
+      try {
+        const items = await fetchCnnBreakingNews();
+        if (!alive) return;
+        setCnnBreaking(items);
+      } catch {
+        if (!alive) return;
+        setCnnBreaking(getFallbackCnnBreakingNews());
+      } finally {
+        if (alive) {
+          setCnnLoading(false);
+        }
+      }
+    }
+
+    loadCnnBreaking();
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   const rankedArticles = useMemo(() => sortByPreference(articles, preferences), [articles, preferences]);
   const rankedVideos = useMemo(() => sortByPreference(videos, preferences), [videos, preferences]);
@@ -336,6 +364,36 @@ function App() {
           />
         </section>
       ) : null}
+
+      <section className="card cnn-section">
+        <div className="panel-header">
+          <div>
+            <p className="section-kicker">Breaking Feed</p>
+            <h3>CNN Breaking News</h3>
+          </div>
+          <p className="panel-note">Live headline stream with photos.</p>
+        </div>
+        {cnnLoading ? (
+          <div className="cnn-grid">
+            <CnnBreakingSkeletonCard />
+            <CnnBreakingSkeletonCard />
+            <CnnBreakingSkeletonCard />
+          </div>
+        ) : (
+          <div className="cnn-grid">
+            {cnnBreaking.map((item) => (
+              <a key={item.id} className="cnn-card" href={item.link} target="_blank" rel="noreferrer">
+                <img src={item.image} alt="" loading="lazy" />
+                <div className="cnn-card-copy">
+                  <span className="story-type">CNN</span>
+                  <h4>{item.title}</h4>
+                  <p>{item.summary}</p>
+                </div>
+              </a>
+            ))}
+          </div>
+        )}
+      </section>
 
       <main className="dashboard" id="main-content">
         <section className="preferences card">
@@ -894,6 +952,94 @@ function StorySkeletonCard() {
       </div>
     </article>
   );
+}
+
+function CnnBreakingSkeletonCard() {
+  return (
+    <article className="cnn-card skeleton-card" aria-hidden="true">
+      <div className="cnn-image-skeleton skeleton-block" />
+      <div className="cnn-card-copy">
+        <span className="story-type skeleton-block" />
+        <div className="skeleton-line long" />
+        <div className="skeleton-line medium" />
+      </div>
+    </article>
+  );
+}
+
+async function fetchCnnBreakingNews() {
+  const rssProxyUrl = "https://api.rss2json.com/v1/api.json?rss_url=https://rss.cnn.com/rss/cnn_latest.rss";
+  const response = await fetch(rssProxyUrl);
+
+  if (!response.ok) {
+    throw new Error("Unable to fetch CNN breaking feed");
+  }
+
+  const data = await response.json();
+  const items = (data.items || []).slice(0, 6).map((item, index) => ({
+    id: item.guid || item.link || `cnn-breaking-${index}`,
+    title: item.title || "CNN Breaking Story",
+    summary: stripHtml(item.description || item.content || "Latest CNN development."),
+    link: item.link || "https://www.cnn.com",
+    image: extractImageFromRssItem(item, index)
+  }));
+
+  if (!items.length) {
+    throw new Error("CNN feed returned no items");
+  }
+
+  return items;
+}
+
+function extractImageFromRssItem(item, index) {
+  const candidates = [
+    item.enclosure?.link,
+    item.thumbnail,
+    item.thumbnailProxied,
+    item.image
+  ].filter(Boolean);
+
+  if (candidates.length) return candidates[0];
+
+  const html = `${item.description || ""} ${item.content || ""}`;
+  const match = html.match(/<img[^>]+src=["']([^"']+)["']/i);
+  if (match?.[1]) return match[1];
+
+  return `https://picsum.photos/seed/cnn-breaking-${index}/1200/700`;
+}
+
+function stripHtml(value) {
+  return String(value || "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 170);
+}
+
+function getFallbackCnnBreakingNews() {
+  return [
+    {
+      id: "cnn-fallback-1",
+      title: "Global leaders react to fast-moving security developments",
+      summary: "Breaking updates from CNN with rapid response statements and live policy implications.",
+      link: "https://www.cnn.com",
+      image: "https://picsum.photos/seed/cnn-fallback-1/1200/700"
+    },
+    {
+      id: "cnn-fallback-2",
+      title: "Markets swing as new economic signals land",
+      summary: "CNN coverage tracks the latest shifts in investor sentiment and macro outlook.",
+      link: "https://www.cnn.com",
+      image: "https://picsum.photos/seed/cnn-fallback-2/1200/700"
+    },
+    {
+      id: "cnn-fallback-3",
+      title: "Severe weather alerts expand across multiple regions",
+      summary: "Emergency crews and officials issue rolling updates as conditions evolve.",
+      link: "https://www.cnn.com",
+      image: "https://picsum.photos/seed/cnn-fallback-3/1200/700"
+    }
+  ];
 }
 
 export default App;
