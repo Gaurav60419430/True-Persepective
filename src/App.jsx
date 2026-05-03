@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { topics } from "./data/fallbackData";
 import { getArticleFeed, getSourceMode, getVideoFeed, sourceModeLabel } from "./services/newsService";
 import { sortByPreference } from "./utils/newsUtils";
@@ -22,6 +22,7 @@ function App() {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const touchStartX = useRef(null);
   const sourceMode = getSourceMode();
 
   function login(credentials) {
@@ -159,6 +160,26 @@ function App() {
     setTrendingIndex((current) => (current + 1) % trendingSlides.length);
   }
 
+  function handleTrendingTouchStart(event) {
+    touchStartX.current = event.changedTouches[0]?.clientX ?? null;
+  }
+
+  function handleTrendingTouchEnd(event) {
+    if (touchStartX.current == null) return;
+
+    const touchEndX = event.changedTouches[0]?.clientX ?? touchStartX.current;
+    const delta = touchEndX - touchStartX.current;
+    touchStartX.current = null;
+
+    if (Math.abs(delta) < 40) return;
+    if (delta < 0) {
+      showNextTrending();
+      return;
+    }
+
+    showPreviousTrending();
+  }
+
   if (selectedArticle) {
     return <ArticleDetail article={selectedArticle} onBack={closeArticle} />;
   }
@@ -226,7 +247,7 @@ function App() {
 
           {trendingSlides.length ? (
             <>
-              <div className="trending-carousel">
+              <div className="trending-carousel" onTouchStart={handleTrendingTouchStart} onTouchEnd={handleTrendingTouchEnd}>
                 <button className="trending-arrow" type="button" aria-label="Previous trending stories" onClick={showPreviousTrending}>
                   &#8249;
                 </button>
@@ -268,6 +289,12 @@ function App() {
                 ))}
               </div>
             </>
+          ) : loading ? (
+            <div className="trending-board">
+              <TrendingSkeletonCard />
+              <TrendingSkeletonCard />
+              <TrendingSkeletonCard />
+            </div>
           ) : (
             <p className="status-message">Trending stories will appear here once recommendations load.</p>
           )}
@@ -298,7 +325,7 @@ function App() {
       ) : null}
 
       <main className="dashboard" id="main-content">
-        <section className="preferences card">
+        <section className="preferences card mobile-sticky-controls">
           <div className="section-head">
             <div>
               <p className="section-kicker">Preference Engine</p>
@@ -387,9 +414,19 @@ function App() {
           </div>
 
           {error ? <p className="status-message error" aria-live="polite">{error}</p> : null}
-          {loading ? <p className="status-message" aria-live="polite">Loading recommendations...</p> : null}
+          {loading && <p className="status-message" aria-live="polite">Loading recommendations...</p>}
 
-          {!loading && (
+          {loading ? (
+            <div className="tab-panels">
+              <section className={`tab-panel ${activeTab === "news" ? "active" : ""}`} role="tabpanel">
+                <div className="card-grid">
+                  <StorySkeletonCard />
+                  <StorySkeletonCard />
+                  <StorySkeletonCard />
+                </div>
+              </section>
+            </div>
+          ) : (
             <div className="tab-panels">
               <section
                 className={`tab-panel ${activeTab === "news" ? "active" : ""}`}
@@ -697,6 +734,39 @@ function getStoryCardStyle(item) {
 function getUniqueArticleImage(item, context) {
   const seed = encodeURIComponent(`${context}-${item.id || item.link || item.title || item.source || "news"}`);
   return `https://picsum.photos/seed/${seed}/1200/800`;
+}
+
+function TrendingSkeletonCard() {
+  return (
+    <article className="trending-story trending-skeleton" aria-hidden="true">
+      <span className="trending-rank skeleton-block" />
+      <div className="trending-copy">
+        <div className="skeleton-line short" />
+        <div className="skeleton-line long" />
+        <div className="skeleton-line medium" />
+      </div>
+    </article>
+  );
+}
+
+function StorySkeletonCard() {
+  return (
+    <article className="story-card skeleton-card" aria-hidden="true">
+      <div className="story-top">
+        <span className="story-type skeleton-block" />
+        <span className="leaning-badge skeleton-block" />
+      </div>
+      <div>
+        <div className="skeleton-line long" />
+        <div className="skeleton-line medium" />
+      </div>
+      <div className="skeleton-line medium" />
+      <div className="story-footer">
+        <span className="score-badge skeleton-block" />
+        <span className="watch-btn skeleton-block" />
+      </div>
+    </article>
+  );
 }
 
 export default App;
